@@ -94,14 +94,18 @@ async function writeManifest(url, data) {
 
 /**
  * @template T
- * @param {T|null|undefined} value
+ * @param {T | null | undefined} value
+ * @param {(() => void) | undefined=} [onfail]
+ * @param {(T | null | undefined)[]} fallback
  */
-export function safe(value) {
-  if (!value) {
+export function safe(value,onfail,...fallback) {
+  const data = value || fallback.find(Boolean)
+  if (!data) {
+    onfail?.()
     console.trace('TRACE',value)
     throw 'Elemen tidak ditemukan'
   }
-  return value
+  return data
 }
 
 /**
@@ -109,4 +113,10 @@ export function safe(value) {
  */
 export function innerText(elem) {
   return elem.innerText
+}
+/**
+ * @param {import('node-html-parser').HTMLElement} elem
+ */
+export function innerHTML(elem) {
+  return elem.innerHTML
 }
