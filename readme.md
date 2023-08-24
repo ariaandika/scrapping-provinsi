@@ -1,5 +1,34 @@
 # Web Scraping untuk Mendapatkan Wilayah Indonesia
 
+## Nomor Kode Pos
+
+source:
+- [kodepos](https://nomorkodepos.com)
+
+dalam web ini, kita bisa query ke domain, lalu tambahkan query parameter `s` diikuti dengan query wilayah, dengan `spasi` diganti `+`
+
+**contoh**: https://nomorkodepos.com/?s=jawa+tengah
+
+didalam halaman terdapat satu tabel, berisi semua data yang kita inginkan
+
+## UPDATE
+
+kita bisa ke domain dengan pathname `/di` tambah nama provinsi huruf kecil dengan spasi diganti `+`. di halaman ini, sama seperti sebelumnya, tapi sudah pasti satu provinsi, dimana sebelumnya kita bisa kelebihan data dari provinsi lain.
+
+**contoh**: https://nomorkodepos.com/di/jawa-tengah
+
+pertama kita ambil semua `tr` didalam `tbody`. didalamnya terdapat 5 `td`, berisi propinsi, kota, kecamatan, desa, kodepos. dilihat lebih dekat, 4 pertama berisi `anchor` dan `span`, baru dalamnya terdapat data text. sedangkan yang terakhir menggunakan `strong` daripada `span`.
+
+```js
+// ini hanya pseudo code
+import { parse } from "node-html-parser";
+
+const q = parse(halamanProvinsi)
+
+q.
+
+```
+
 ## Stekom
 
 source:
