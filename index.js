@@ -2,15 +2,7 @@
 import { getDist, getPage, innerText, log, provinsiSource, safe, str } from "./lib.js";
 import { parse } from "node-html-parser";
 
-const kabupaten = await getKabupaten()
-
-
-
-
-
-
-
-
+log(await getKecamatanHref())
 
 
 async function getProvinsiList() {
@@ -55,4 +47,32 @@ async function getKabupaten() {
   })
 
   return Object.fromEntries(kabupaten)
+}
+
+async function getKecamatanHref() {
+  const q = parse(await getPage(provinsiSource))
+  const provList = await getDist('provinsi') ?? await getProvinsiList2()
+  const tabelList = q.querySelectorAll('table.wikitable')
+  tabelList.shift()
+
+  return tabelList.map( (provTabel, i) => {
+    
+    const title = provList[i]
+    const trs = provTabel.querySelectorAll('tr')
+    trs.shift()
+    
+    const links = trs
+      .map( tr => {
+        const title = safe(tr.querySelector('a')).innerText;
+        
+        const links = tr
+          .querySelectorAll('td')[i == 1 ? 7 : 6]
+          .querySelector('a')
+          ?.getAttribute('href')
+        
+        return [title,safe(links)]
+      })
+    
+    return [title,Object.fromEntries(links)]
+  })
 }

@@ -45,7 +45,7 @@ untuk membedakan dengan tabel pertama, tabel yang kita inginkan memiliki class `
 
 **masalah lebih spesifik**
 
-tabel sumatra utara, tidak ada class `mw-collapsible`, jadi kita harus modifikasi selector menggunakan `table.wikitable`, dan hilangkan tabel pertama
+tabel Sumatra Utara, tidak ada class `mw-collapsible`, jadi kita harus modifikasi selector menggunakan `table.wikitable`, dan hilangkan tabel pertama
 
 ```js
 const q = parse(halamanProvinsi)
@@ -71,7 +71,65 @@ const kabupaten = tabelList.map( (provTabel, i) => {
 })
 ```
 
+### 3. Kecamatan dan Kelurahan `href`
 
+disinilah kita mulai navigasi dan mulai _scrapping_ ke setiap halaman lain
+
+dalam setiap tabel provinsi, pada baris kabupaten yang berupa `tr`, terdapat kolom kecamatan berisi jumlah kecamatan. Jumlah kecamatan tersebut berupa `anchor` yang mengarah ke halaman lain. Halaman tersebut berisi daftar kecamatan pada kabupaten yang bersangkutan, dalam halaman inilah data yang kita inginkan.
+
+untuk mendapatkan `anchor` tersebut, untuk setiap tabel, kita ambil `td` ke-6 dari setiap `tr`. `td` tersebut berisi `anchor` yang kita inginkan
+
+
+```js
+const q = parse(halamanProvinsi)
+
+// gunakan cara seperti sebelumnya
+let tabelProvinsi
+
+const tabelLinks = tabelProvinsi.map((provTabel, i) => {
+  const trs = provTabel.querySelectorAll('tr')
+  trs.shift()
+  
+  const links = trs
+    .map( tr => tr
+      .querySelectorAll('td')[6]
+      .querySelector('a')
+      .getAttribute('href')
+    )
+  
+  return links
+})
+```
+
+**masalah lebih detail:**
+
+tabel Sumatra Utara memiliki kolom khusus IPM, yang terletak pada td ke-6. Kasus ini **HANYA** terjadi pada tabel Sumatra Utara, jadi untuk sekarang kita tambah kondisi khusus, Sumatra Utara terdapat pada iterasi ke-2, yaitu index 1, kita tambahkan kondisi khusus di sana, dimana kita ambil `td` ke 7
+
+
+```js
+const q = parse(halamanProvinsi)
+
+// gunakan cara seperti sebelumnya
+let tabelProvinsi
+
+const tabelLinks = tabelProvinsi.map((provTabel, i) => {
+  const trs = provTabel.querySelectorAll('tr')
+  trs.shift()
+  
+  const links = trs
+    .map( tr => tr
+      .querySelectorAll('td')[i == 1 ? 7 : 6]
+      .querySelector('a')
+      .getAttribute('href')
+    )
+  
+  return links
+})
+```
+
+saat ini kita mendapatkan `link` / `href` untuk setiap kabupaten yang menuju ke halaman yang berisi kecamatan dan kelurahan. Setelah ini bergantung apakah setiap halaman kelurahan dan kecamatan memiliki konsep yang sama.
+
+### 4. Kecamatan dan Kelurahan dalam halaman
 
 ## Dasar
 
