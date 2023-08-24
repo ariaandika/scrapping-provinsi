@@ -1,6 +1,7 @@
 
 import { readFile, writeFile } from "fs/promises";
 
+export const sourceDomain = "https://p2k.stekom.ac.id"
 export const source = "https://p2k.stekom.ac.id/ensiklopedia"
 export const provinsiUrl = "/Daftar_kabupaten_dan_kota_di_Indonesia"
 export const provinsiSource = source + provinsiUrl
@@ -90,7 +91,10 @@ async function getManifest(url) {
  * @param {T|null|undefined} value
  */
 export function safe(value) {
-  if (!value) throw 'Elemen tidak ditemukan'
+  if (!value) {
+    console.trace('TRACE',value)
+    throw 'Elemen tidak ditemukan'
+  }
   return value
 }
 

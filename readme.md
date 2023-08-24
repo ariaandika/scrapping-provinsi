@@ -18,6 +18,7 @@ jika dilihat lebih dekat, `anchor` untuk wilayah, memiliki `parent` `td` dengan 
 kita bisa gunakan itu untuk mendapatkan list provinsi
 
 ```js
+// ini hanya pseudo code
 import { parse } from "node-html-parser";
 
 const q = parse(halamanProvinsi)
@@ -30,6 +31,7 @@ const listProvinsi = tabelProvinsi
 ada cara lain, yaitu semua `h3` memiliki `span` `child` yang berisi provinsi tersebut
 
 ```js
+// ini hanya pseudo code
 const q = parse(halamanProvinsi)
 
 const listProvinsi = q
@@ -48,6 +50,7 @@ untuk membedakan dengan tabel pertama, tabel yang kita inginkan memiliki class `
 tabel Sumatra Utara, tidak ada class `mw-collapsible`, jadi kita harus modifikasi selector menggunakan `table.wikitable`, dan hilangkan tabel pertama
 
 ```js
+// ini hanya pseudo code
 const q = parse(halamanProvinsi)
 
 // list provinsi sebelumnya menggunakan *metode ke dua* !
@@ -81,6 +84,7 @@ untuk mendapatkan `anchor` tersebut, untuk setiap tabel, kita ambil `td` ke-6 da
 
 
 ```js
+// ini hanya pseudo code
 const q = parse(halamanProvinsi)
 
 // gunakan cara seperti sebelumnya
@@ -107,6 +111,7 @@ tabel Sumatra Utara memiliki kolom khusus IPM, yang terletak pada td ke-6. Kasus
 
 
 ```js
+// ini hanya pseudo code
 const q = parse(halamanProvinsi)
 
 // gunakan cara seperti sebelumnya
@@ -130,6 +135,46 @@ const tabelLinks = tabelProvinsi.map((provTabel, i) => {
 saat ini kita mendapatkan `link` / `href` untuk setiap kabupaten yang menuju ke halaman yang berisi kecamatan dan kelurahan. Setelah ini bergantung apakah setiap halaman kelurahan dan kecamatan memiliki konsep yang sama.
 
 ### 4. Kecamatan dan Kelurahan dalam halaman
+
+bagian ini digunakan di setiap halaman
+
+dalam halaman, terdapat tabel dengan atribut `width="100%"`. tabel tersebut memiliki banyak `tr`, untuk menghilangkan header dan footer tabel, filter `tr` yang tidak memiliki atribut `style`. Di setiap `tr`, kita ambil `anchor` dalam `td` ke-dua, dari sini kita mendapatkan **kecamatan**. Masih dalam `tr` yang sama, pada `td` ke-4, terdapat tabel lain yang berisi data kelurahan. Karena datanya sangat dalam, dari `tr` kita bisa langsung mencari elemen `ul`, tapi `ul` ada dua, kita ambil yang terakhir. `ul` ini berisi `li` **kelurahan**.
+
+**masalah lebih detail:**
+
+filter `tr` yang tidak memiliki atribut `style` tidak cukup, ternyata ada `tr` lainya di dalam `tabel` yang tidak kita inginkan. Beruntung `tr` yang kita inginkan terdapat atribute `valign="top"`, kita bisa tambahkan ini dalam selector. 
+
+```js
+// ini hanya pseudo code
+const wilayahLengkap = links.map( (prov,kabupatenList) => {
+  
+  const kabupatenResult = kabupatenList.map( (kabupaten, link) => {
+      
+    const q = parse(await getPage(sourceDomain + link))
+
+    const tabel = q.querySelector('table[width]')
+    const trs = tabel.querySelectorAll('tr[valign="top"]:not([style])')
+    
+    const kecamatanList = trs.map( (tr,i) => {
+      const kecamatan = tr
+        .querySelectorAll('td')[1]
+        .querySelector('a')
+        .innerText
+      
+      const kelurahanList = tr
+        .querySelectorAll('ul')[1]
+        .querySelectorAll('li')
+        .map(innerText)
+      
+      return [kecamatan,kelurahanList]
+    })
+    
+    return [kabupaten,kecamatanList]
+  })
+  
+  return [prov,kabupatenResult]
+})
+```
 
 ## Dasar
 

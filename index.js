@@ -1,8 +1,52 @@
 
-import { getDist, getPage, innerText, log, provinsiSource, safe, str } from "./lib.js";
+import { getDist, getPage, innerText, log as print, provinsiSource, safe, sourceDomain, str } from "./lib.js";
 import { parse } from "node-html-parser";
 
-log(await getKecamatanHref())
+const links = await getKecamatanHref()
+
+// const result = links.map( async ([prov,kabupatenList]) => {
+  
+//   const kabupatenResult = await Promise.all(
+//     kabupatenList.map(page)
+//   )
+  
+//   return [prov,kabupatenResult]
+// })
+
+const prov = links[0][0]
+const kab = links[0][1][0][0]
+const kabLink = links[0][1][0][1]
+
+const result = await page([kab,kabLink])
+
+print(str(result))
+
+/**
+ * @param {readonly [string,string]} param0 
+ */
+async function page([kabupaten,link]) {
+  const q = parse(await getPage(sourceDomain + link))
+
+  const tabel = safe(q.querySelector('table[width]'))
+  const trs = tabel.querySelectorAll('tr[valign="top"]:not([style])')
+  
+  const kecamatanList = trs.map( (tr,i) => {
+    const kecamatan = safe(tr
+      .querySelectorAll('td')[1]
+      .querySelector('a')
+    ).innerText
+    
+    const kelurahanList = tr
+      .querySelectorAll('ul')[1]
+      .querySelectorAll('li')
+      .map(innerText)
+    
+    return [kecamatan,kelurahanList]
+  })
+  
+  return [kabupaten,Object.fromEntries(kecamatanList)]
+}
+
 
 
 async function getProvinsiList() {
@@ -55,8 +99,9 @@ async function getKecamatanHref() {
   const tabelList = q.querySelectorAll('table.wikitable')
   tabelList.shift()
 
-  return tabelList.map( (provTabel, i) => {
+  const links = tabelList.map( (provTabel, i) => {
     
+    /** @type {string} */
     const title = provList[i]
     const trs = provTabel.querySelectorAll('tr')
     trs.shift()
@@ -70,9 +115,11 @@ async function getKecamatanHref() {
           .querySelector('a')
           ?.getAttribute('href')
         
-        return [title,safe(links)]
+        return /** @type {const} */ ( [title,safe(links)] )
       })
     
-    return [title,Object.fromEntries(links)]
+    return /** @type {const} */ ( [title,links] )
   })
+  
+  return links
 }
