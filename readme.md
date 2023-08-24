@@ -2,9 +2,9 @@
 
 ## Cara kerja dasar
 
-tersedia library untuk 
+tersedia library untuk melakukan beberapa fungsi lebih efisien, seperti caching. Tersedia juga http api server.
 
-## Nomor Kode Pos
+## nomorkodepos.com
 
 source:
 - [kodepos](https://nomorkodepos.com)
@@ -19,7 +19,7 @@ dalam web ini, kita bisa query ke domain, lalu tambahkan query parameter `s` dii
 
 didalam halaman terdapat satu tabel, berisi semua data yang kita inginkan
 
-## UPDATE
+**UPDATE**
 
 kita bisa ke domain dengan pathname `/di` tambah nama provinsi huruf kecil dengan spasi diganti `-`. di halaman ini, sama seperti sebelumnya, tapi sudah pasti satu provinsi, dimana sebelumnya kita bisa kelebihan data dari provinsi lain.
 
