@@ -1,10 +1,12 @@
 # Web Scraping untuk Mendapatkan Wilayah Indonesia
 
-
-## Strategi
+## Stekom
 
 source:
 - [stekom](https://p2k.stekom.ac.id/ensiklopedia/Daftar_kabupaten_dan_kota_di_Indonesia)
+
+## peringatan:
+- banyak halaman kecamatan / kelurahan yang tidak konsisten, segala error hanya akan dilewati, namun bisa dilihat di terminal, hasil akhirnya data tidak lengkap
 
 ### 1. Provinsi
 
@@ -142,7 +144,9 @@ dalam halaman, terdapat tabel dengan atribut `width="100%"`. tabel tersebut memi
 
 **masalah lebih detail:**
 
-filter `tr` yang tidak memiliki atribut `style` tidak cukup, ternyata ada `tr` lainya di dalam `tabel` yang tidak kita inginkan. Beruntung `tr` yang kita inginkan terdapat atribute `valign="top"`, kita bisa tambahkan ini dalam selector. 
+filter `tr` yang tidak memiliki atribut `style` tidak cukup, ternyata ada `tr` lainya di dalam `tabel` yang tidak kita inginkan. Beruntung `tr` yang kita inginkan terdapat atribute `valign="top"`, kita bisa tambahkan ini dalam selector.
+
+Kabupaten Simeulue, tidak ada dua `ul` dalam `tr`, jadi tambahkan kondisi khusus jika `ul[1]` tidak ada, maka gunakan `ul[0]`.
 
 ```js
 // ini hanya pseudo code

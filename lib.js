@@ -6,6 +6,10 @@ export const source = "https://p2k.stekom.ac.id/ensiklopedia"
 export const provinsiUrl = "/Daftar_kabupaten_dan_kota_di_Indonesia"
 export const provinsiSource = source + provinsiUrl
 
+const cachePath = 'cache/stekom'
+const manifestPath = 'cache/stekom/manifest.json'
+const outputPath = 'dist/stekom'
+
 export const log = console.log
 export const str = JSON.stringify
 export const json = JSON.parse
@@ -14,9 +18,9 @@ export const jsonWrite = (/** @type {any} */ s) => JSON.parse(JSON.stringify(s))
 let manifest
 
 try {
-  manifest = JSON.parse(await readFile('cache/manifest.json','utf-8'))
+  manifest = JSON.parse(await readFile(manifestPath,'utf-8'))
 } catch (error) {
-  await writeFile('cache/manifest.json','{}')
+  await writeFile(manifestPath,'{}')
   manifest = {}
 }
 
@@ -34,7 +38,7 @@ export async function getPage(url) {
  */
 export async function getDist(name) {
   try {
-    return JSON.parse(await readFile('dist/' + name + '.json','utf-8'))
+    return JSON.parse(await readFile(outputPath + '/' + name + '.json','utf-8'))
   } catch (error) {
     return null
   }
@@ -67,8 +71,8 @@ async function writeManifest(url, data) {
   } while (manf.includes(hash));
   
   manifest[url] = hash
-  await writeFile('cache/' + hash + '.html', data)
-  await writeFile('cache/manifest.json', JSON.stringify(manifest))
+  await writeFile(cachePath + '/' + hash + '.html', data)
+  await writeFile(manifestPath, JSON.stringify(manifest))
 }
 
 
@@ -77,7 +81,7 @@ async function writeManifest(url, data) {
  */
 async function getManifest(url) {
   let data
-  if (manifest[url] && (data = await safeReadFile('cache/' + manifest[url] + '.html'))) {}
+  if (manifest[url] && (data = await safeReadFile(cachePath + '/' + manifest[url] + '.html'))) {}
   else {
     const res = await fetch(url).then(e=>e.text())
     await writeManifest(url,res)

@@ -3,21 +3,44 @@ import { getDist, getPage, innerText, log as print, provinsiSource, safe, source
 import { parse } from "node-html-parser";
 
 const links = await getKecamatanHref()
+console.error(links.length)
+
+const result = []
+
+for (const [prov,kabupatenList] of links) {
+  const kabupatenResult = []
+  
+  for (const kab of kabupatenList) {
+    try {
+      kabupatenResult.push(await page(kab))
+    } catch (error) {
+      console.error('ERROR',kab[0],error)
+      kabupatenResult.push([kab[1],{}])
+    }
+  }
+  
+  result.push( [prov,kabupatenResult])
+}
 
 // const result = links.map( async ([prov,kabupatenList]) => {
+//   // const kabupatenResult = await Promise.all(
+//   //   kabupatenList.map(page)
+//   // )
   
-//   const kabupatenResult = await Promise.all(
-//     kabupatenList.map(page)
-//   )
+//   const kabupatenResult = []
+  
+//   for (const kab of kabupatenList) {
+//     kabupatenResult.push(await page(kab))
+//   }
   
 //   return [prov,kabupatenResult]
 // })
 
-const prov = links[0][0]
-const kab = links[0][1][0][0]
-const kabLink = links[0][1][0][1]
-
-const result = await page([kab,kabLink])
+/// test
+// const prov = links[0][0]
+// const kab = links[0][1][0][0]
+// const kabLink = links[0][1][0][1]
+// const result = await page([kab,kabLink])
 
 print(str(result))
 
@@ -26,8 +49,14 @@ print(str(result))
  */
 async function page([kabupaten,link]) {
   const q = parse(await getPage(sourceDomain + link))
-
-  const tabel = safe(q.querySelector('table[width]'))
+  const tabel = q.querySelector('table[width]')
+  
+  if (!tabel) {
+    console.error(kabupaten, "GAGAL")
+    return [kabupaten,{}]
+  }
+  console.error(kabupaten)
+  
   const trs = tabel.querySelectorAll('tr[valign="top"]:not([style])')
   
   const kecamatanList = trs.map( (tr,i) => {
@@ -36,8 +65,11 @@ async function page([kabupaten,link]) {
       .querySelector('a')
     ).innerText
     
-    const kelurahanList = tr
-      .querySelectorAll('ul')[1]
+    
+    const ul = tr.querySelectorAll('ul')
+    
+    // Kabupaten Simeulue, tidak ada dua `ul`
+    const kelurahanList = (ul[1] ?? ul[0])
       .querySelectorAll('li')
       .map(innerText)
     
