@@ -4,14 +4,74 @@
 
 tersedia library untuk melakukan beberapa fungsi lebih efisien, seperti caching. Tersedia juga http api server.
 
+## Wikipedia
+
+source:
+- [wikipedia](https://id.wikipedia.org/wiki/Provinsi_di_Indonesia)
+
+## peringatan:
+
+- wikipedia data tidak lengkap, banyak halaman yang tidak konsisten, membuat web scrapping gagal
+
+### 1. Provinsi
+
+di halaman utama, terdapat **tabel** berisi data provinsi dan link menuju halaman yang berisi kabupaten untuk provinsi yang bersangkutan. tabel tersebut memiliki class `.wikitable`, kita bisa gunakan ini untuk mengambil semua `tr`. 2 `tr` untuk header harus dihilangkan. setiap `tr` terdapat data provinsi yang berupa `anchor`. beruntung provinsi merupakan `anchor` pertama, kita bisa gunakan ini. kita juga perlu mengambil url menuju halaman daftar kabupaten, url tersebut berada di `anchor` jumlah kabupaten, yang berada di `td` ke-9.
+
+```js
+// ini hanya pseudo code
+import { parse } from "node-html-parser";
+
+const q = parse(halamanProvinsi)
+
+const provinsiList = q.querySelector('.wikitable > tbody')
+  .querySelectorAll('tr')
+  .filter( tr => !(tr.querySelector('td').getAttribute('colspan')) )
+  .slice(2) // dalam percobaan, tr untuk header harus dihilangkan
+  .map( tr => {
+    const tds = tr.querySelectorAll('td')
+    
+    const kabUrl = tds[9].querySelector('a').getAttribute('href')
+    
+    const provinsi = tr.querySelector('a').innerText
+    
+    return { provinsi, kabUrl }
+  })
+;
+```
+
+## todo
+
+halaman tidak lengkap, mencoba ambil data pada provinsi tertentu
+
 ## nomorkodepos.com
 
 source:
 - [kodepos](https://nomorkodepos.com)
 
+const provinsiList = safe(q.querySelector('.wikitable > tbody'))
+  .querySelectorAll('tr')
+  .filter( tr => !(tr.querySelector('td')?.getAttribute('colspan')) )
+  .slice(2)
+  .map( tr => {
+    const tds = tr.querySelectorAll('td')
+    
+    const kabUrl = safe(tds[9].querySelector('a')).getAttribute('href')
+    
+    const provinsi = safe(tr.querySelector('a')).innerText
+    
+    result[provinsi] = {}
+    
+    return {
+      provinsi, kabUrl: domain + safe(kabUrl)
+    }
+  })
+;
+
 ## peringatan:
 
 - nomorkodepos.com tidak membedakan kota dan kabupaten, hasilnya, jika kota dan kabupaten namanya sama semua kecamatan akan digabung
+
+### Strategi
 
 dalam web ini, kita bisa query ke domain, lalu tambahkan query parameter `s` diikuti dengan query wilayah, dengan `spasi` diganti `+`
 
