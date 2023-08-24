@@ -1,9 +1,17 @@
 # Web Scraping untuk Mendapatkan Wilayah Indonesia
 
+## Cara kerja dasar
+
+tersedia library untuk 
+
 ## Nomor Kode Pos
 
 source:
 - [kodepos](https://nomorkodepos.com)
+
+## peringatan:
+
+- nomorkodepos.com tidak membedakan kota dan kabupaten, hasilnya, jika kota dan kabupaten namanya sama semua kecamatan akan digabung
 
 dalam web ini, kita bisa query ke domain, lalu tambahkan query parameter `s` diikuti dengan query wilayah, dengan `spasi` diganti `+`
 
@@ -13,7 +21,7 @@ didalam halaman terdapat satu tabel, berisi semua data yang kita inginkan
 
 ## UPDATE
 
-kita bisa ke domain dengan pathname `/di` tambah nama provinsi huruf kecil dengan spasi diganti `+`. di halaman ini, sama seperti sebelumnya, tapi sudah pasti satu provinsi, dimana sebelumnya kita bisa kelebihan data dari provinsi lain.
+kita bisa ke domain dengan pathname `/di` tambah nama provinsi huruf kecil dengan spasi diganti `-`. di halaman ini, sama seperti sebelumnya, tapi sudah pasti satu provinsi, dimana sebelumnya kita bisa kelebihan data dari provinsi lain.
 
 **contoh**: https://nomorkodepos.com/di/jawa-tengah
 
@@ -25,8 +33,18 @@ import { parse } from "node-html-parser";
 
 const q = parse(halamanProvinsi)
 
-q.
+const trs = q.querySelectorAll('tbody > tr')
 
+const result = {}
+
+for (const provinsi of provinsiList) {
+  trs.map( tr => {
+    const [,kota,kecamatan,desa] = tr.querySelectorAll('span').map(innerText)
+    const kodepos = tr.querySelectorAll('strong')[0].innerText
+    
+    result[provinsi][kota][kecamatan][desa] = kodepos
+  })
+}
 ```
 
 ## Stekom
