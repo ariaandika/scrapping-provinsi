@@ -1,25 +1,47 @@
 
 import { getDist, getPage, innerText, log as print, provinsiSource, safe, sourceDomain, str } from "./lib.js";
 import { parse } from "node-html-parser";
+import { writeFile, mkdir } from "fs/promises";
 
 const links = await getKecamatanHref()
 console.error(links.length)
 
+const outPath = 'dist/stekom/prov'
 const result = []
 
+/*
+GOAL
+
+stack:
+provinsi
+  kabupaten
+    kecamatan
+      kelurahan
+
+- paling kecil: satu kecamatan satu file, berisi list kelurahan
+- menengah: satu kabupaten satu file, berisi semua kecamatan dan kelurahan  
+  mungkin paling ideal
+
+  
+*/
+
 for (const [prov,kabupatenList] of links) {
-  const kabupatenResult = []
+  await mkdir(outPath + '/' + prov, { recursive: true })
   
   for (const kab of kabupatenList) {
+    const kabupatenResult = []
+    
     try {
       kabupatenResult.push(await page(kab))
     } catch (error) {
       console.error('ERROR',kab[0],error)
       kabupatenResult.push([kab[1],{}])
     }
+    
+    await writeFile(outPath + '/' + prov + '/' + kab[0] + '.json',str(Object.fromEntries(kabupatenResult)), {  })
   }
   
-  result.push( [prov,kabupatenResult])
+  // result.push( [prov,Object.fromEntries(kabupatenResult)])
 }
 
 // const result = links.map( async ([prov,kabupatenList]) => {
@@ -42,7 +64,7 @@ for (const [prov,kabupatenList] of links) {
 // const kabLink = links[0][1][0][1]
 // const result = await page([kab,kabLink])
 
-print(str(result))
+// print(str(result))
 
 /**
  * @param {readonly [string,string]} param0 
@@ -53,7 +75,7 @@ async function page([kabupaten,link]) {
   
   if (!tabel) {
     console.error(kabupaten, "GAGAL")
-    return [kabupaten,{}]
+    return /** @type {const} */ ([kabupaten,{}])
   }
   console.error(kabupaten)
   
@@ -73,10 +95,10 @@ async function page([kabupaten,link]) {
       .querySelectorAll('li')
       .map(innerText)
     
-    return [kecamatan,kelurahanList]
+    return /** @type {const} */ ([kecamatan,kelurahanList])
   })
   
-  return [kabupaten,Object.fromEntries(kecamatanList)]
+  return /** @type {const} */ ([kabupaten,Object.fromEntries(kecamatanList)])
 }
 
 
